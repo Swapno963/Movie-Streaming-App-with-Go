@@ -6,6 +6,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
+	"github.com/swapno963/MovieDegital/MagicMoviesServer/ServerMagicMoviesServer/MagicMoviesServer/controllers"
 )
 
 func main() {
@@ -13,6 +14,8 @@ func main() {
 	router.GET("/hello", func(c *gin.Context) {
 		c.String(200, "Hello Go coders")
 	})
+
+	router.GET("/movies", controllers.GetMovies())
 
 	err := godotenv.Load(".env")
 	if err != nil {
