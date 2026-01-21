@@ -16,7 +16,8 @@ func main() {
 	})
 
 	router.GET("/movies", controllers.GetMovies())
-	router.GET("/movies/:imdb_id", controllers.GetMovie())
+	router.GET("/movie/:imdb_id", controllers.GetMovie())
+	router.POST("/addmovie", controllers.AddMovie())
 
 	err := godotenv.Load(".env")
 	if err != nil {
