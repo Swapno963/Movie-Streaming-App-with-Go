@@ -15,9 +15,13 @@ func main() {
 		c.String(200, "Hello Go coders")
 	})
 
+	// Movies
 	router.GET("/movies", controllers.GetMovies())
 	router.GET("/movie/:imdb_id", controllers.GetMovie())
 	router.POST("/addmovie", controllers.AddMovie())
+
+	// User
+	router.POST("/register", controllers.RegisterUser())
 
 	err := godotenv.Load(".env")
 	if err != nil {
