@@ -16,6 +16,7 @@ func main() {
 	})
 
 	router.GET("/movies", controllers.GetMovies())
+	router.GET("/movies/:imdb_id", controllers.GetMovie())
 
 	err := godotenv.Load(".env")
 	if err != nil {
