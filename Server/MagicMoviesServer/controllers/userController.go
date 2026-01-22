@@ -80,7 +80,7 @@ func RegisterUser() gin.HandlerFunc {
 
 }
 
-func LoginUser(client *mongo.Client) gin.HandlerFunc {
+func LoginUser() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var userLogin models.UserLogin
 
@@ -112,7 +112,7 @@ func LoginUser(client *mongo.Client) gin.HandlerFunc {
 			return
 		}
 
-		err = utils.UpdateAllTokens(foundUser.UserID, token, refreshToken, client)
+		err = utils.UpdateAllTokens(foundUser.UserID, token, refreshToken)
 
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update tokens"})

@@ -22,6 +22,7 @@ func main() {
 
 	// User
 	router.POST("/register", controllers.RegisterUser())
+	router.POST("/login", controllers.LoginUser())
 
 	err := godotenv.Load(".env")
 	if err != nil {
