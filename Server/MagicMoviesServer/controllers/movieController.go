@@ -15,13 +15,12 @@ import (
 
 var validate = validator.New()
 
-var movieCollection *mongo.Collection = database.OpenCollection("movies")
-
-func GetMovies() gin.HandlerFunc {
+func GetMovies(client *mongo.Client) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		ctx, cancel := context.WithTimeout(c, 100*time.Second)
 		defer cancel()
 
+		var movieCollection *mongo.Collection = database.OpenCollection("movies", client)
 		cursor, err := movieCollection.Find(ctx, bson.D{})
 
 		if err != nil {
@@ -41,7 +40,7 @@ func GetMovies() gin.HandlerFunc {
 	}
 }
 
-func GetMovie() gin.HandlerFunc {
+func GetMovie(client *mongo.Client) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		ctx, cancel := context.WithTimeout(c, 100*time.Second)
 		defer cancel()
@@ -52,7 +51,7 @@ func GetMovie() gin.HandlerFunc {
 			return
 		}
 
-		var movieCollection *mongo.Collection = database.OpenCollection("movies")
+		var movieCollection *mongo.Collection = database.OpenCollection("movies", client)
 		var movie models.Movie
 
 		err := movieCollection.FindOne(ctx, bson.D{{Key: "imdb_id", Value: movieId}}).Decode(&movie)
@@ -66,7 +65,7 @@ func GetMovie() gin.HandlerFunc {
 	}
 }
 
-func AddMovie() gin.HandlerFunc {
+func AddMovie(client *mongo.Client) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		ctx, cancel := context.WithTimeout(c, 100*time.Second)
 		defer cancel()
@@ -80,6 +79,7 @@ func AddMovie() gin.HandlerFunc {
 			c.JSON(http.StatusBadRequest, gin.H{"error": "Validation failed", "details": err.Error()})
 		}
 
+		var movieCollection *mongo.Collection = database.OpenCollection("movies", client)
 		result, err := movieCollection.InsertOne(ctx, movie)
 
 		if err != nil {
