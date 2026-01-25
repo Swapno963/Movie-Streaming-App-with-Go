@@ -221,7 +221,7 @@ func LogoutHandler(client *mongo.Client) gin.HandlerFunc {
 	}
 }
 
-func RefreshTokenHandler() gin.HandlerFunc {
+func RefreshTokenHandler(client *mongo.Client) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var ctx, cancel = context.WithTimeout(c, 100*time.Second)
 		defer cancel()
