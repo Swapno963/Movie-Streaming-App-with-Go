@@ -9,6 +9,7 @@ import (
 	"go.mongodb.org/mongo-driver/v2/bson"
 	"go.mongodb.org/mongo-driver/v2/mongo"
 
+	"github.com/gin-gonic/gin"
 	"github.com/swapno963/MovieDegital/MagicMoviesServer/ServerMagicMoviesServer/MagicMoviesServer/database"
 
 	jwt "github.com/golang-jwt/jwt/v5"
@@ -112,4 +113,24 @@ func ValidateRefreshToken(tokenString string) (*SignedDetails, error) {
 	}
 
 	return claims, nil
+}
+
+func GetAccessToken(c *gin.Context) (string, error) {
+	// authHeader := c.Request.Header.Get("Authorization")
+	// if authHeader == "" {
+	// 	return "", errors.New("Authorization header is required")
+	// }
+	// tokenString := authHeader[len("Bearer "):]
+
+	// if tokenString == "" {
+	// 	return "", errors.New("Bearer token is required")
+	// }
+	tokenString, err := c.Cookie("access_token")
+	if err != nil {
+
+		return "", err
+	}
+
+	return tokenString, nil
+
 }
