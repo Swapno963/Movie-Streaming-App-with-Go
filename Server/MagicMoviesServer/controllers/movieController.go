@@ -90,3 +90,26 @@ func AddMovie(client *mongo.Client) gin.HandlerFunc {
 		c.JSON(http.StatusCreated, result)
 	}
 }
+
+func GetRankings(client *mongo.Client, c *gin.Context) ([]models.Ranking, error) {
+	var rankings []models.Ranking
+
+	var ctx, cancel = context.WithTimeout(c, 100*time.Second)
+	defer cancel()
+
+	var rankingCollection *mongo.Collection = database.OpenCollection("rankings", client)
+
+	cursor, err := rankingCollection.Find(ctx, bson.D{})
+
+	if err != nil {
+		return nil, err
+	}
+	defer cursor.Close(ctx)
+
+	if err := cursor.All(ctx, &rankings); err != nil {
+		return nil, err
+	}
+
+	return rankings, nil
+
+}
