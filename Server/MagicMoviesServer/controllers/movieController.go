@@ -18,6 +18,7 @@ import (
 	"github.com/tmc/langchaingo/llms/openai"
 	"go.mongodb.org/mongo-driver/v2/bson"
 	"go.mongodb.org/mongo-driver/v2/mongo"
+	"go.mongodb.org/mongo-driver/v2/mongo/options"
 )
 
 var validate = validator.New()
@@ -192,6 +193,7 @@ func AdminReviewUpdate(client *mongo.Client) gin.HandlerFunc {
 
 	}
 }
+
 func GetReviewRanking(admin_review string, client *mongo.Client, c *gin.Context) (string, int, error) {
 	rankings, err := GetRankings(client, c)
 
@@ -245,5 +247,53 @@ func GetReviewRanking(admin_review string, client *mongo.Client, c *gin.Context)
 		}
 	}
 	return response, rankVal, nil
+
+}
+
+func GetUsersFavouriteGenres(userId string, client *mongo.Client, c *gin.Context) ([]string, error) {
+
+	var ctx, cancel = context.WithTimeout(c, 100*time.Second)
+	defer cancel()
+
+	filter := bson.D{{Key: "user_id", Value: userId}}
+
+	projection := bson.M{
+		"favourite_genres.genre_name": 1,
+		"_id":                         0,
+	}
+
+	opts := options.FindOne().SetProjection(projection)
+	var result bson.M
+
+	var userCollection *mongo.Collection = database.OpenCollection("users", client)
+	err := userCollection.FindOne(ctx, filter, opts).Decode(&result)
+
+	if err != nil {
+		if err == mongo.ErrNoDocuments {
+			return []string{}, nil
+		}
+	}
+
+	favGenresArray, ok := result["favourite_genres"].(bson.A)
+
+	if !ok {
+		return []string{}, errors.New("unable to retrieve favourite genres for user")
+	}
+
+	var genreNames []string
+
+	for _, item := range favGenresArray {
+		if genreMap, ok := item.(bson.D); ok {
+			for _, elem := range genreMap {
+				if elem.Key == "genre_name" {
+					if name, ok := elem.Value.(string); ok {
+						genreNames = append(genreNames, name)
+					}
+				}
+			}
+		}
+	}
+
+	return genreNames, nil
 
 }
