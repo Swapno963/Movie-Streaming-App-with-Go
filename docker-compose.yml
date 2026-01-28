@@ -1,0 +1,51 @@
+version: "3.9"
+services:
+  mongo:
+    image: mongo:6.0
+    container_name: magic_movies_mongo
+    restart: unless-stopped
+    environment:
+      MONGO_INITDB_DATABASE: ${DATABASE_NAME:-magic-stream-movies}
+    volumes:
+      - mongo-data:/data/db
+    ports:
+      - "27017:27017"      # remove in production if not needed
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - magic-network
+
+  server:
+    build:
+      context: ./Server/MagicMoviesServer
+      dockerfile: Dockerfile
+    image: magicmovies/server:latest
+    container_name: magic_movies_server
+    restart: on-failure
+    env_file:
+      - ./Server/MagicMoviesServer/.env
+    environment:
+      - MONGODB_URI=mongodb://mongo:27017/
+      - DATABASE_NAME=${DATABASE_NAME}
+    depends_on:
+      mongo:
+        condition: service_healthy
+    ports:
+      - "8080:8080"
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8080/health || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+    networks:
+      - magic-network
+
+volumes:
+  mongo-data:
+
+networks:
+  magic-network:
+    driver: bridge
